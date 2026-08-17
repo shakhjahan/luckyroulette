@@ -1,1 +1,76 @@
-import{auth,db}from"./firebase.js";import{createUserWithEmailAndPassword}from"https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";import{get,ref,set}from"https://www.gstatic.com/firebasejs/12.1.0/firebase-database.js";registerForm.addEventListener("submit",async e=>{e.preventDefault();error.textContent="";const username=document.getElementById("username").value.trim(),usernameLower=username.toLowerCase(),pw=document.getElementById("password").value;if(!/^[a-zA-Z0-9_.-]{3,30}$/.test(username)){error.textContent="Login 3–30 belgidan iborat bo‘lsin: harf, raqam, _, -, .";return}try{const s=await get(ref(db,"users"));const users=s.val()||{};if(Object.values(users).some(u=>u.usernameLower===usernameLower)){error.textContent="Bu login allaqachon band.";return}/* Firebase Email/Password auth email talab qiladi. Foydalanuvchiga email ko‘rsatilmaydi; ichki texnik email ishlatiladi. */const internalEmail=`${usernameLower.replace(/[^a-z0-9_.-]/g,"_")}@luckyroulette.invalid`;const c=await createUserWithEmailAndPassword(auth,internalEmail,pw);await set(ref(db,`users/${c.user.uid}`),{username,usernameLower,email:internalEmail,role:"user",balance:100000,active:true,createdAt:Date.now()});location.href="./dashboard.html"}catch(x){console.error(x);error.textContent=x.code==="auth/email-already-in-use"?"Bu login allaqachon band.":"Ro‘yxatdan o‘tishda xatolik."}});
+import { auth, db } from "./firebase.js";
+import { createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
+import { get, ref, set } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-database.js";
+
+const form = document.getElementById("registerForm");
+const error = document.getElementById("error");
+
+form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    error.textContent = "";
+
+    const username = document.getElementById("username").value.trim();
+    const usernameLower = username.toLowerCase();
+    const password = document.getElementById("password").value;
+
+    if (!/^[a-zA-Z0-9_.-]{3,30}$/.test(username)) {
+        error.textContent =
+            "Login 3–30 belgidan iborat bo‘lsin: harf, raqam, _, -, .";
+        return;
+    }
+
+    if (password.length < 6) {
+        error.textContent = "Parol kamida 6 ta belgidan iborat bo‘lishi kerak.";
+        return;
+    }
+
+    try {
+        // Avval login bandligini tekshiramiz
+        const snapshot = await get(ref(db, "users"));
+        const users = snapshot.val() || {};
+
+        const exists = Object.values(users).some(
+            (u) => u.usernameLower === usernameLower
+        );
+
+        if (exists) {
+            error.textContent = "Bu login allaqachon band.";
+            return;
+        }
+
+        // Firebase uchun ichki texnik email
+        const internalEmail =
+            `${usernameLower.replace(/[^a-z0-9_.-]/g, "_")}@luckyroulette.invalid`;
+
+        console.log("Firebase account yaratilmoqda...");
+
+        const credential = await createUserWithEmailAndPassword(
+            auth,
+            internalEmail,
+            password
+        );
+
+        console.log("Firebase Auth OK:", credential.user.uid);
+
+        await set(ref(db, `users/${credential.user.uid}`), {
+            username: username,
+            usernameLower: usernameLower,
+            email: internalEmail,
+            role: "user",
+            balance: 100000,
+            active: true,
+            createdAt: Date.now()
+        });
+
+        console.log("Realtime Database OK");
+
+        location.href = "./dashboard.html";
+
+    } catch (err) {
+        console.error("REGISTER ERROR:", err);
+
+        error.textContent =
+            "Xatolik: " + (err.code || err.message || "Noma'lum xato");
+    }
+});
