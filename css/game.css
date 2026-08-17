@@ -1,0 +1,407 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #101010;
+  color: white;
+}
+
+.navbar {
+  height: 64px;
+  padding: 0 28px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  background: #181818;
+  border-bottom: 1px solid #333;
+}
+
+.navbar b {
+  font-size: 22px;
+}
+
+.navbar a,
+.navbar button {
+  color: white;
+  background: none;
+  border: none;
+  text-decoration: none;
+
+  cursor: pointer;
+  margin-left: 18px;
+}
+
+.game-page {
+  width: min(1100px, 94%);
+  margin: auto;
+
+  padding: 30px 0 60px;
+
+  text-align: center;
+}
+
+.game-page h1 {
+  margin-bottom: 5px;
+  font-size: 38px;
+}
+
+.description {
+  color: #aaa;
+}
+
+/* PLAYERS */
+
+.players {
+  display: grid;
+
+  grid-template-columns:
+    repeat(3, 1fr);
+
+  gap: 15px;
+
+  margin: 30px 0;
+}
+
+.player-card {
+  background: #1c1c1c;
+
+  border: 1px solid #333;
+  border-radius: 16px;
+
+  padding: 20px;
+
+  transition: .3s;
+}
+
+.player-number {
+  width: 38px;
+  height: 38px;
+
+  margin: auto auto 12px;
+
+  display: grid;
+  place-items: center;
+
+  border-radius: 50%;
+
+  background: #333;
+
+  font-weight: bold;
+}
+
+.player-name {
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.player-bet {
+  margin-top: 8px;
+
+  font-size: 18px;
+}
+
+.player-status {
+  margin-top: 10px;
+
+  color: #aaa;
+}
+
+.player-status.ready {
+  color: #52df8a;
+}
+
+/* POT */
+
+.pot-box {
+  width: min(400px, 90%);
+
+  margin: 20px auto;
+
+  padding: 18px;
+
+  background: #191919;
+
+  border-radius: 15px;
+}
+
+.pot-box span {
+  display: block;
+
+  color: #999;
+}
+
+.pot-box strong {
+  display: block;
+
+  margin-top: 6px;
+
+  font-size: 28px;
+}
+
+/* CONTROL */
+
+.control-panel {
+  width: min(400px, 100%);
+
+  margin: 25px auto;
+
+  padding: 22px;
+
+  background: #1b1b1b;
+
+  border-radius: 16px;
+
+  border: 1px solid #333;
+}
+
+.control-panel h2 {
+  margin-top: 0;
+}
+
+.control-panel label {
+  display: block;
+
+  text-align: left;
+
+  color: #aaa;
+
+  margin-bottom: 6px;
+}
+
+.control-panel input {
+  width: 100%;
+
+  padding: 13px;
+
+  border-radius: 8px;
+
+  border: 1px solid #444;
+
+  background: #111;
+
+  color: white;
+
+  font-size: 17px;
+}
+
+.control-panel button {
+  width: 100%;
+
+  margin-top: 14px;
+
+  padding: 13px;
+
+  border: none;
+
+  border-radius: 9px;
+
+  cursor: pointer;
+
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.hidden {
+  display: none;
+}
+
+/* ROULETTE */
+
+.roulette-area {
+  position: relative;
+
+  width: min(560px, 90vw);
+
+  aspect-ratio: 1;
+
+  margin: 45px auto;
+}
+
+.pointer {
+  position: absolute;
+
+  z-index: 20;
+
+  top: -18px;
+  left: 50%;
+
+  transform: translateX(-50%);
+
+  font-size: 42px;
+
+  text-shadow:
+    0 3px 10px black;
+}
+
+/*
+   3 qanotli spinner.
+   Mercedes-Benz belgisi emas,
+   balki unga o‘xshash uch yo‘nalishli
+   geometrik shakl.
+*/
+
+.wheel {
+  position: absolute;
+
+  inset: 0;
+
+  border-radius: 50%;
+
+  overflow: hidden;
+
+  border: 8px solid #ddd;
+
+  background: #222;
+
+  box-shadow:
+    0 0 35px rgba(0,0,0,.8);
+
+  transition:
+    transform 5.8s
+    cubic-bezier(.12,.74,.12,1);
+}
+
+.sector {
+  position: absolute;
+
+  inset: 0;
+
+  display: flex;
+
+  justify-content: center;
+
+  align-items: flex-start;
+
+  padding-top: 16%;
+
+  font-size: clamp(16px, 3vw, 27px);
+
+  font-weight: bold;
+
+  text-shadow:
+    0 2px 5px black;
+}
+
+.sector span {
+  max-width: 30%;
+
+  text-align: center;
+
+  overflow-wrap: anywhere;
+}
+
+.sector-one {
+  clip-path:
+    polygon(
+      50% 50%,
+      0 0,
+      100% 0
+    );
+
+  background: #772131;
+}
+
+.sector-two {
+  clip-path:
+    polygon(
+      50% 50%,
+      100% 0,
+      100% 100%
+    );
+
+  background: #1d587a;
+}
+
+.sector-three {
+  clip-path:
+    polygon(
+      50% 50%,
+      100% 100%,
+      0 100%
+    );
+
+  background: #80621b;
+}
+
+.sector-two span {
+  margin-top: 27%;
+}
+
+.sector-three span {
+  margin-top: 27%;
+}
+
+.wheel-center {
+  position: absolute;
+
+  z-index: 10;
+
+  width: 25%;
+  height: 25%;
+
+  top: 37.5%;
+  left: 37.5%;
+
+  border-radius: 50%;
+
+  display: grid;
+  place-items: center;
+
+  background: #111;
+
+  border: 5px solid #ddd;
+
+  font-weight: bold;
+  font-size: 22px;
+}
+
+/* STATUS */
+
+.status {
+  margin-top: 20px;
+
+  font-size: 20px;
+
+  color: #ccc;
+}
+
+.countdown {
+  min-height: 70px;
+
+  font-size: 58px;
+
+  font-weight: bold;
+}
+
+.result {
+  min-height: 45px;
+
+  margin-top: 15px;
+
+  font-size: 27px;
+
+  font-weight: bold;
+}
+
+/* MOBILE */
+
+@media (max-width: 700px) {
+
+  .players {
+    grid-template-columns: 1fr;
+  }
+
+  .game-page h1 {
+    font-size: 30px;
+  }
+
+  .navbar {
+    padding: 0 14px;
+  }
+
+}
