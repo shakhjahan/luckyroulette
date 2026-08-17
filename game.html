@@ -1,141 +1,280 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="uz">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Lucky Roulette</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <link rel="stylesheet" href="./css/game.css">
+    <title>Lucky Roulette</title>
+
+    <link rel="stylesheet" href="./css/game.css">
 </head>
 
 <body>
 
 <header class="navbar">
-  <b>Lucky Roulette</b>
 
-  <div>
-    <a href="./dashboard.html">Kabinet</a>
-    <button id="logoutBtn">Chiqish</button>
-  </div>
+    <div class="logo">
+        Lucky Roulette
+    </div>
+
+    <div class="nav-right">
+        <a href="./dashboard.html">Kabinet</a>
+        <button id="logoutBtn">Chiqish</button>
+    </div>
+
 </header>
+
 
 <main class="game-page">
 
-  <h1>Lucky Roulette</h1>
+    <h1>Lucky Roulette</h1>
 
-  <p class="description">
-    3 ishtirokchi. 3 ta stavka. 1 ta g‘olib.
-  </p>
+    <p class="subtitle">
+        3 ishtirokchi • 1 g‘olib
+    </p>
 
-  <!-- ISHTIROKCHILAR -->
-  <section class="players" id="players">
 
-    <div class="player-card">
-      <div class="player-number">1</div>
-      <div class="player-name">Kutilmoqda...</div>
-      <div class="player-bet">—</div>
-      <div class="player-status">Bo‘sh</div>
+    <!-- ISHTIROKCHILAR -->
+
+    <section class="players">
+
+        <div class="player-card" id="playerCard1">
+
+            <div class="player-number">
+                1
+            </div>
+
+            <div
+                class="player-name"
+                id="player1Name"
+            >
+                Kutilmoqda...
+            </div>
+
+            <div
+                class="player-bet"
+                id="player1Bet"
+            >
+                —
+            </div>
+
+            <div
+                class="player-ready"
+                id="player1Ready"
+            >
+                Kutilmoqda
+            </div>
+
+        </div>
+
+
+        <div class="player-card" id="playerCard2">
+
+            <div class="player-number">
+                2
+            </div>
+
+            <div
+                class="player-name"
+                id="player2Name"
+            >
+                Kutilmoqda...
+            </div>
+
+            <div
+                class="player-bet"
+                id="player2Bet"
+            >
+                —
+            </div>
+
+            <div
+                class="player-ready"
+                id="player2Ready"
+            >
+                Kutilmoqda
+            </div>
+
+        </div>
+
+
+        <div class="player-card" id="playerCard3">
+
+            <div class="player-number">
+                3
+            </div>
+
+            <div
+                class="player-name"
+                id="player3Name"
+            >
+                Kutilmoqda...
+            </div>
+
+            <div
+                class="player-bet"
+                id="player3Bet"
+            >
+                —
+            </div>
+
+            <div
+                class="player-ready"
+                id="player3Ready"
+            >
+                Kutilmoqda
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- BANK -->
+
+    <div class="pot-box">
+
+        <span>Jami bank</span>
+
+        <strong id="totalPot">
+            0 UZS
+        </strong>
+
     </div>
 
-    <div class="player-card">
-      <div class="player-number">2</div>
-      <div class="player-name">Kutilmoqda...</div>
-      <div class="player-bet">—</div>
-      <div class="player-status">Bo‘sh</div>
-    </div>
 
-    <div class="player-card">
-      <div class="player-number">3</div>
-      <div class="player-name">Kutilmoqda...</div>
-      <div class="player-bet">—</div>
-      <div class="player-status">Bo‘sh</div>
-    </div>
+    <!-- O'YINGA QO'SHILISH -->
 
-  </section>
-
-  <!-- BANK -->
-  <section class="pot-box">
-    <span>Jami bank</span>
-    <strong id="pot">0 UZS</strong>
-  </section>
-
-  <!-- O'YINGA QO'SHILISH -->
-  <section id="joinPanel" class="control-panel">
-
-    <h2>O‘yinga qo‘shilish</h2>
-
-    <label for="betInput">
-      Stavka miqdori
-    </label>
-
-    <input
-      id="betInput"
-      type="number"
-      min="1000"
-      step="1000"
-      value="10000"
+    <section
+        id="joinPanel"
+        class="control-panel"
     >
 
-    <button id="joinBtn">
-      Stavkani tasdiqlash
-    </button>
+        <h2>O‘yinga qo‘shilish</h2>
 
-  </section>
+        <label for="betInput">
+            Stavka
+        </label>
 
-  <!-- TAYYOR -->
-  <section id="readyPanel" class="control-panel hidden">
+        <input
+            id="betInput"
+            type="number"
+            min="1000"
+            step="1000"
+            value="10000"
+        >
 
-    <h2>Stavkangiz qabul qilindi</h2>
+        <button id="joinBtn">
+            Stavkani tasdiqlash
+        </button>
 
-    <p id="myBet"></p>
+    </section>
 
-    <button id="readyBtn">
-      ✓ TAYYOR
-    </button>
 
-  </section>
+    <!-- TAYYOR -->
 
-  <!-- SPINNER -->
-  <section class="roulette-area">
+    <section
+        id="readyPanel"
+        class="control-panel hidden"
+    >
 
-    <div class="pointer">
-      ▼
+        <h2>Stavka qabul qilindi</h2>
+
+        <p id="myBet">
+            —
+        </p>
+
+        <button id="readyBtn">
+            ✓ TAYYOR
+        </button>
+
+    </section>
+
+
+    <!-- BARABAN -->
+
+    <section class="wheel-area">
+
+        <div class="arrow">
+            ▼
+        </div>
+
+        <div
+            id="wheel"
+            class="wheel"
+        >
+
+            <!-- LOGINLAR -->
+
+            <div class="sector-label label-1">
+                <span id="wheelName1">
+                    Kutilmoqda
+                </span>
+            </div>
+
+            <div class="sector-label label-2">
+                <span id="wheelName2">
+                    Kutilmoqda
+                </span>
+            </div>
+
+            <div class="sector-label label-3">
+                <span id="wheelName3">
+                    Kutilmoqda
+                </span>
+            </div>
+
+
+            <!-- 2 TA CHEGARA -->
+
+            <div class="divider divider-1"></div>
+
+            <div class="divider divider-2"></div>
+
+
+            <!-- MARKAZ -->
+
+            <div class="wheel-center">
+                LR
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- STATUS -->
+
+    <div
+        id="gameStatus"
+        class="game-status"
+    >
+        3 ta ishtirokchi kutilmoqda.
     </div>
 
-    <div id="wheel" class="wheel">
 
-      <div class="sector sector-one">
-        <span id="name1">Kutilmoqda</span>
-      </div>
+    <!-- COUNTDOWN -->
 
-      <div class="sector sector-two">
-        <span id="name2">Kutilmoqda</span>
-      </div>
+    <div
+        id="countdown"
+        class="countdown"
+    ></div>
 
-      <div class="sector sector-three">
-        <span id="name3">Kutilmoqda</span>
-      </div>
 
-      <div class="wheel-center">
-        LR
-      </div>
+    <!-- RESULT -->
 
-    </div>
-
-  </section>
-
-  <!-- STATUS -->
-  <div id="status" class="status">
-    3 ta ishtirokchi kutilmoqda.
-  </div>
-
-  <div id="countdown" class="countdown"></div>
-
-  <div id="result" class="result"></div>
+    <div
+        id="result"
+        class="result"
+    ></div>
 
 </main>
 
-<script type="module" src="./js/game.js?v=3"></script>
+
+<script
+    type="module"
+    src="./js/game.js?v=4"
+></script>
 
 </body>
 </html>
