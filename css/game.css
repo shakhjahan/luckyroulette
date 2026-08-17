@@ -1,407 +1,668 @@
 * {
-  box-sizing: border-box;
+    box-sizing: border-box;
 }
+
 
 body {
-  margin: 0;
-  font-family: Arial, sans-serif;
-  background: #101010;
-  color: white;
+    margin: 0;
+
+    font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
+
+    background: #101010;
+
+    color: white;
 }
+
+
+/* NAVBAR */
 
 .navbar {
-  height: 64px;
-  padding: 0 28px;
+    height: 65px;
 
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+    padding: 0 28px;
 
-  background: #181818;
-  border-bottom: 1px solid #333;
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    background: #181818;
+
+    border-bottom:
+        1px solid #303030;
 }
 
-.navbar b {
-  font-size: 22px;
+
+.logo {
+    font-size: 22px;
+
+    font-weight: bold;
 }
 
-.navbar a,
-.navbar button {
-  color: white;
-  background: none;
-  border: none;
-  text-decoration: none;
 
-  cursor: pointer;
-  margin-left: 18px;
+.nav-right {
+    display: flex;
+
+    align-items: center;
+
+    gap: 18px;
 }
+
+
+.nav-right a {
+    color: white;
+
+    text-decoration: none;
+}
+
+
+.nav-right button {
+    border: none;
+
+    background: transparent;
+
+    color: white;
+
+    cursor: pointer;
+
+    font-size: 15px;
+}
+
+
+/* PAGE */
 
 .game-page {
-  width: min(1100px, 94%);
-  margin: auto;
+    width: min(1100px, 94%);
 
-  padding: 30px 0 60px;
+    margin: auto;
 
-  text-align: center;
+    padding:
+        30px 0 60px;
+
+    text-align: center;
 }
+
 
 .game-page h1 {
-  margin-bottom: 5px;
-  font-size: 38px;
+    margin:
+        0 0 5px;
+
+    font-size: 38px;
 }
 
-.description {
-  color: #aaa;
+
+.subtitle {
+    color: #999;
+
+    margin-top: 0;
 }
+
 
 /* PLAYERS */
 
 .players {
-  display: grid;
+    display: grid;
 
-  grid-template-columns:
-    repeat(3, 1fr);
+    grid-template-columns:
+        repeat(3, 1fr);
 
-  gap: 15px;
+    gap: 15px;
 
-  margin: 30px 0;
+    margin:
+        30px 0 20px;
 }
+
 
 .player-card {
-  background: #1c1c1c;
+    padding: 20px;
 
-  border: 1px solid #333;
-  border-radius: 16px;
+    background: #1a1a1a;
 
-  padding: 20px;
+    border:
+        1px solid #333;
 
-  transition: .3s;
+    border-radius: 15px;
+
+    transition: .25s;
 }
+
 
 .player-number {
-  width: 38px;
-  height: 38px;
+    width: 40px;
+    height: 40px;
 
-  margin: auto auto 12px;
+    margin:
+        0 auto 10px;
 
-  display: grid;
-  place-items: center;
+    display: flex;
 
-  border-radius: 50%;
+    align-items: center;
 
-  background: #333;
+    justify-content: center;
 
-  font-weight: bold;
+    border-radius: 50%;
+
+    background: #333;
+
+    font-weight: bold;
 }
+
 
 .player-name {
-  font-size: 20px;
-  font-weight: bold;
+    font-size: 19px;
+
+    font-weight: bold;
 }
+
 
 .player-bet {
-  margin-top: 8px;
+    margin-top: 8px;
 
-  font-size: 18px;
+    color: #ddd;
+
+    font-size: 16px;
 }
 
-.player-status {
-  margin-top: 10px;
 
-  color: #aaa;
+.player-ready {
+    margin-top: 10px;
+
+    color: #888;
 }
 
-.player-status.ready {
-  color: #52df8a;
+
+.player-ready.ready {
+    color: #45c96b;
+
+    font-weight: bold;
 }
 
-/* POT */
+
+/* BANK */
 
 .pot-box {
-  width: min(400px, 90%);
+    width: 350px;
 
-  margin: 20px auto;
+    max-width: 90%;
 
-  padding: 18px;
+    margin:
+        20px auto;
 
-  background: #191919;
+    padding: 17px;
 
-  border-radius: 15px;
+    background: #191919;
+
+    border:
+        1px solid #333;
+
+    border-radius: 14px;
 }
+
 
 .pot-box span {
-  display: block;
+    display: block;
 
-  color: #999;
+    color: #888;
 }
+
 
 .pot-box strong {
-  display: block;
+    display: block;
 
-  margin-top: 6px;
+    margin-top: 5px;
 
-  font-size: 28px;
+    font-size: 26px;
 }
+
 
 /* CONTROL */
 
 .control-panel {
-  width: min(400px, 100%);
+    width: 380px;
 
-  margin: 25px auto;
+    max-width: 100%;
 
-  padding: 22px;
+    margin:
+        25px auto;
 
-  background: #1b1b1b;
+    padding: 22px;
 
-  border-radius: 16px;
+    background: #1b1b1b;
 
-  border: 1px solid #333;
+    border:
+        1px solid #333;
+
+    border-radius: 15px;
 }
+
 
 .control-panel h2 {
-  margin-top: 0;
+    margin-top: 0;
 }
+
 
 .control-panel label {
-  display: block;
+    display: block;
 
-  text-align: left;
+    text-align: left;
 
-  color: #aaa;
+    margin-bottom: 7px;
 
-  margin-bottom: 6px;
+    color: #999;
 }
+
 
 .control-panel input {
-  width: 100%;
+    width: 100%;
 
-  padding: 13px;
+    padding: 13px;
 
-  border-radius: 8px;
+    border:
+        1px solid #444;
 
-  border: 1px solid #444;
+    border-radius: 8px;
 
-  background: #111;
+    outline: none;
 
-  color: white;
+    background: #101010;
 
-  font-size: 17px;
+    color: white;
+
+    font-size: 17px;
 }
+
 
 .control-panel button {
-  width: 100%;
+    width: 100%;
 
-  margin-top: 14px;
+    margin-top: 13px;
 
-  padding: 13px;
+    padding: 13px;
 
-  border: none;
+    border: none;
 
-  border-radius: 9px;
+    border-radius: 8px;
 
-  cursor: pointer;
+    background: #d84040;
 
-  font-size: 16px;
-  font-weight: bold;
+    color: white;
+
+    cursor: pointer;
+
+    font-size: 16px;
+
+    font-weight: bold;
 }
+
+
+.control-panel button:hover {
+    opacity: .9;
+}
+
+
+.control-panel button:disabled {
+    opacity: .5;
+
+    cursor: not-allowed;
+}
+
 
 .hidden {
-  display: none;
+    display: none;
 }
 
-/* ROULETTE */
 
-.roulette-area {
-  position: relative;
+/* =========================
+   BARABAN
+   ========================= */
 
-  width: min(560px, 90vw);
+.wheel-area {
+    width: 500px;
 
-  aspect-ratio: 1;
+    height: 500px;
 
-  margin: 45px auto;
+    max-width: 90vw;
+
+    max-height: 90vw;
+
+    margin:
+        55px auto;
+
+    position: relative;
 }
 
-.pointer {
-  position: absolute;
 
-  z-index: 20;
+.arrow {
+    position: absolute;
 
-  top: -18px;
-  left: 50%;
+    z-index: 50;
 
-  transform: translateX(-50%);
+    left: 50%;
 
-  font-size: 42px;
+    top: -38px;
 
-  text-shadow:
-    0 3px 10px black;
+    transform:
+        translateX(-50%);
+
+    color: white;
+
+    font-size: 45px;
+
+    text-shadow:
+        0 3px 8px black;
 }
+
 
 /*
-   3 qanotli spinner.
-   Mercedes-Benz belgisi emas,
-   balki unga o‘xshash uch yo‘nalishli
-   geometrik shakl.
+   3 x 120 DEGREE
+
+   HAMMASI QIZIL
 */
 
 .wheel {
-  position: absolute;
+    width: 500px;
 
-  inset: 0;
+    height: 500px;
 
-  border-radius: 50%;
+    max-width: 90vw;
 
-  overflow: hidden;
+    max-height: 90vw;
 
-  border: 8px solid #ddd;
+    position: relative;
 
-  background: #222;
+    border-radius: 50%;
 
-  box-shadow:
-    0 0 35px rgba(0,0,0,.8);
+    overflow: hidden;
 
-  transition:
-    transform 5.8s
-    cubic-bezier(.12,.74,.12,1);
+    background:
+        conic-gradient(
+            #d84040 0deg 120deg,
+            #d84040 120deg 240deg,
+            #d84040 240deg 360deg
+        );
+
+    border:
+        12px solid #d9aa36;
+
+    box-shadow:
+        0 0 30px
+        rgba(0,0,0,.75);
+
+    transition:
+        transform 5.5s
+        cubic-bezier(
+            .12,
+            .74,
+            .12,
+            1
+        );
 }
 
-.sector {
-  position: absolute;
 
-  inset: 0;
+/*
+   LOGINLAR
+*/
 
-  display: flex;
 
-  justify-content: center;
+.sector-label {
+    position: absolute;
 
-  align-items: flex-start;
+    z-index: 10;
 
-  padding-top: 16%;
+    width: 150px;
 
-  font-size: clamp(16px, 3vw, 27px);
+    text-align: center;
 
-  font-weight: bold;
+    color: white;
 
-  text-shadow:
-    0 2px 5px black;
+    font-size: 20px;
+
+    font-weight: bold;
+
+    text-shadow:
+        0 2px 5px black;
 }
 
-.sector span {
-  max-width: 30%;
 
-  text-align: center;
+.label-1 {
+    left: 175px;
 
-  overflow-wrap: anywhere;
+    top: 70px;
 }
 
-.sector-one {
-  clip-path:
-    polygon(
-      50% 50%,
-      0 0,
-      100% 0
-    );
 
-  background: #772131;
+.label-2 {
+    right: 28px;
+
+    top: 235px;
 }
 
-.sector-two {
-  clip-path:
-    polygon(
-      50% 50%,
-      100% 0,
-      100% 100%
-    );
 
-  background: #1d587a;
+.label-3 {
+    left: 28px;
+
+    top: 235px;
 }
 
-.sector-three {
-  clip-path:
-    polygon(
-      50% 50%,
-      100% 100%,
-      0 100%
-    );
 
-  background: #80621b;
+/*
+   FAQAT 2 TA CHIZIQ
+*/
+
+.divider {
+    position: absolute;
+
+    z-index: 8;
+
+    left: 50%;
+
+    top: 50%;
+
+    width: 4px;
+
+    height: 50%;
+
+    background: white;
+
+    transform-origin:
+        bottom center;
+
+    box-shadow:
+        0 0 5px black;
 }
 
-.sector-two span {
-  margin-top: 27%;
+
+.divider-1 {
+    transform:
+        translate(
+            -50%,
+            -100%
+        )
+        rotate(120deg);
 }
 
-.sector-three span {
-  margin-top: 27%;
+
+.divider-2 {
+    transform:
+        translate(
+            -50%,
+            -100%
+        )
+        rotate(240deg);
 }
+
+
+/* MARKAZ */
 
 .wheel-center {
-  position: absolute;
+    position: absolute;
 
-  z-index: 10;
+    z-index: 20;
 
-  width: 25%;
-  height: 25%;
+    left: 50%;
 
-  top: 37.5%;
-  left: 37.5%;
+    top: 50%;
 
-  border-radius: 50%;
+    width: 100px;
 
-  display: grid;
-  place-items: center;
+    height: 100px;
 
-  background: #111;
+    transform:
+        translate(
+            -50%,
+            -50%
+        );
 
-  border: 5px solid #ddd;
+    display: flex;
 
-  font-weight: bold;
-  font-size: 22px;
+    align-items: center;
+
+    justify-content: center;
+
+    border-radius: 50%;
+
+    background: #111;
+
+    border:
+        6px solid #d9aa36;
+
+    color: white;
+
+    font-size: 22px;
+
+    font-weight: bold;
+
+    box-shadow:
+        0 0 15px
+        rgba(0,0,0,.8);
 }
+
+
+/* =========================
+   G‘OLIB SEKTORI
+   ========================= */
+
+
+/* 1 */
+
+.wheel.winner-1 {
+    background:
+        conic-gradient(
+            #45c96b 0deg 120deg,
+            #d84040 120deg 240deg,
+            #d84040 240deg 360deg
+        );
+}
+
+
+/* 2 */
+
+.wheel.winner-2 {
+    background:
+        conic-gradient(
+            #d84040 0deg 120deg,
+            #45c96b 120deg 240deg,
+            #d84040 240deg 360deg
+        );
+}
+
+
+/* 3 */
+
+.wheel.winner-3 {
+    background:
+        conic-gradient(
+            #d84040 0deg 120deg,
+            #d84040 120deg 240deg,
+            #45c96b 240deg 360deg
+        );
+}
+
 
 /* STATUS */
 
-.status {
-  margin-top: 20px;
+.game-status {
+    min-height: 30px;
 
-  font-size: 20px;
+    margin-top: 10px;
 
-  color: #ccc;
+    color: #ccc;
+
+    font-size: 18px;
 }
+
 
 .countdown {
-  min-height: 70px;
+    height: 70px;
 
-  font-size: 58px;
+    font-size: 60px;
 
-  font-weight: bold;
+    font-weight: bold;
 }
+
 
 .result {
-  min-height: 45px;
+    min-height: 45px;
 
-  margin-top: 15px;
+    margin-top: 10px;
 
-  font-size: 27px;
+    font-size: 26px;
 
-  font-weight: bold;
+    font-weight: bold;
 }
+
 
 /* MOBILE */
 
 @media (max-width: 700px) {
 
-  .players {
-    grid-template-columns: 1fr;
-  }
+    .players {
+        grid-template-columns: 1fr;
+    }
 
-  .game-page h1 {
-    font-size: 30px;
-  }
 
-  .navbar {
-    padding: 0 14px;
-  }
+    .game-page h1 {
+        font-size: 30px;
+    }
+
+
+    .wheel-area,
+    .wheel {
+        width: 90vw;
+
+        height: 90vw;
+    }
+
+
+    .sector-label {
+        width: 110px;
+
+        font-size: 15px;
+    }
+
+
+    .label-1 {
+        left: calc(50% - 55px);
+
+        top: 13%;
+    }
+
+
+    .label-2 {
+        right: 2%;
+
+        top: 47%;
+    }
+
+
+    .label-3 {
+        left: 2%;
+
+        top: 47%;
+    }
 
 }
