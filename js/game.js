@@ -1,55 +1,56 @@
 import { db, auth } from "./firebase.js";
 
 import {
-  ref,
-  get,
-  set,
-  update,
-  push,
-  onValue
+    ref,
+    get,
+    set,
+    update,
+    push,
+    onValue
 } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-database.js";
 
 import {
-  onAuthStateChanged,
-  signOut
+    onAuthStateChanged,
+    signOut
 } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
 
 
-const playersEl =
-  document.getElementById("players");
-
-const potEl =
-  document.getElementById("pot");
-
-const statusEl =
-  document.getElementById("status");
-
-const countdownEl =
-  document.getElementById("countdown");
-
-const resultEl =
-  document.getElementById("result");
+/* =========================
+   ELEMENTLAR
+   ========================= */
 
 const wheel =
-  document.getElementById("wheel");
+    document.getElementById("wheel");
 
 const joinPanel =
-  document.getElementById("joinPanel");
+    document.getElementById("joinPanel");
 
 const readyPanel =
-  document.getElementById("readyPanel");
+    document.getElementById("readyPanel");
 
 const betInput =
-  document.getElementById("betInput");
+    document.getElementById("betInput");
 
 const joinBtn =
-  document.getElementById("joinBtn");
+    document.getElementById("joinBtn");
 
 const readyBtn =
-  document.getElementById("readyBtn");
+    document.getElementById("readyBtn");
 
 const myBet =
-  document.getElementById("myBet");
+    document.getElementById("myBet");
+
+const totalPot =
+    document.getElementById("totalPot");
+
+const gameStatus =
+    document.getElementById("gameStatus");
+
+const countdown =
+    document.getElementById("countdown");
+
+const result =
+    document.getElementById("result");
 
 
 let currentUser = null;
@@ -62,796 +63,926 @@ let game = null;
 
 let spinning = false;
 
-let wheelRotation = 0;
+let rotation = 0;
 
 
-/* LOGOUT */
+/* =========================
+   LOGOUT
+   ========================= */
 
 document
-  .getElementById("logoutBtn")
-  .addEventListener("click", async () => {
+    .getElementById("logoutBtn")
+    .addEventListener(
+        "click",
+        async () => {
 
-    await signOut(auth);
+            await signOut(auth);
 
-    location.href = "./login.html";
+            location.href =
+                "./login.html";
 
-  });
+        }
+    );
 
 
-/* AUTH */
+/* =========================
+   AUTH
+   ========================= */
 
 onAuthStateChanged(
-  auth,
-  async user => {
+    auth,
+    async user => {
 
-    if (!user) {
+        if (!user) {
 
-      location.href = "./login.html";
+            location.href =
+                "./login.html";
 
-      return;
+            return;
+
+        }
+
+        currentUser = user;
+
+
+        const snapshot =
+            await get(
+                ref(
+                    db,
+                    `users/${user.uid}`
+                )
+            );
+
+
+        if (!snapshot.exists()) {
+
+            gameStatus.textContent =
+                "Profil topilmadi.";
+
+            return;
+
+        }
+
+
+        profile =
+            snapshot.val();
+
+
+        await findGame();
 
     }
-
-    currentUser = user;
-
-    const snapshot =
-      await get(
-        ref(
-          db,
-          `users/${user.uid}`
-        )
-      );
-
-    if (!snapshot.exists()) {
-
-      statusEl.textContent =
-        "Foydalanuvchi topilmadi.";
-
-      return;
-
-    }
-
-    profile =
-      snapshot.val();
-
-    await findGame();
-
-  }
 );
 
 
-/* GAME TOPISH */
+/* =========================
+   O‘YIN TOPISH
+   ========================= */
 
 async function findGame() {
 
-  const snapshot =
-    await get(
-      ref(db, "games")
-    );
+    const snapshot =
+        await get(
+            ref(db, "games")
+        );
 
-  const games =
-    snapshot.val() || {};
 
-  let found = null;
+    const games =
+        snapshot.val() || {};
 
-  for (
-    const [id, data]
-    of Object.entries(games)
-  ) {
 
-    const players =
-      Object.keys(
-        data.players || {}
-      );
+    let availableGame =
+        null;
 
-    if (
-      data.status === "waiting" &&
-      players.length < 3
+
+    for (
+        const [id, data]
+        of Object.entries(games)
     ) {
 
-      found = id;
+        const players =
+            Object.keys(
+                data.players || {}
+            );
 
-      break;
+
+        if (
+            data.status === "waiting" &&
+            players.length < 3
+        ) {
+
+            availableGame = id;
+
+            break;
+
+        }
 
     }
 
-  }
+
+    /*
+       MAVJUD O‘YIN BO‘LSA
+    */
+
+    if (availableGame) {
+
+        gameId =
+            availableGame;
+
+    }
 
 
-  if (found) {
+    /*
+       AKS HOLDA YANGI O‘YIN
+    */
 
-    gameId = found;
+    else {
 
-  } else {
-
-    gameId =
-      push(
-        ref(db, "games")
-      ).key;
-
-    await set(
-      ref(
-        db,
-        `games/${gameId}`
-      ),
-      {
-        status: "waiting",
-
-        players: {},
-
-        totalPot: 0,
-
-        createdAt:
-          Date.now()
-      }
-    );
-
-  }
+        gameId =
+            push(
+                ref(db, "games")
+            ).key;
 
 
-  watchGame();
+        await set(
+            ref(
+                db,
+                `games/${gameId}`
+            ),
+            {
+
+                status:
+                    "waiting",
+
+                players: {},
+
+                totalPot:
+                    0,
+
+                createdAt:
+                    Date.now()
+
+            }
+        );
+
+    }
+
+
+    watchGame();
 
 }
 
 
-/* FIREBASE REALTIME */
+/* =========================
+   FIREBASE WATCH
+   ========================= */
 
 function watchGame() {
 
-  onValue(
-    ref(
-      db,
-      `games/${gameId}`
-    ),
-    snapshot => {
+    onValue(
+        ref(
+            db,
+            `games/${gameId}`
+        ),
+        snapshot => {
 
-      game =
-        snapshot.val();
+            game =
+                snapshot.val();
 
-      if (!game) return;
 
-      renderGame();
+            if (!game)
+                return;
 
-    }
-  );
+
+            renderGame();
+
+        }
+    );
 
 }
 
 
-/* RENDER */
+/* =========================
+   RENDER
+   ========================= */
 
 function renderGame() {
 
-  const players =
-    Object.entries(
-      game.players || {}
-    );
-
-  const totalPot =
-    players.reduce(
-      (sum, [, player]) =>
-        sum + Number(player.bet || 0),
-      0
-    );
+    const players =
+        Object.entries(
+            game.players || {}
+        );
 
 
-  potEl.textContent =
-    totalPot.toLocaleString(
-      "uz-UZ"
-    ) + " UZS";
+    /*
+       BANK
+    */
+
+    const pot =
+        players.reduce(
+            (sum, [, player]) =>
+                sum +
+                Number(
+                    player.bet || 0
+                ),
+            0
+        );
 
 
-  /*
-     PLAYER CARDS
-  */
-
-  playersEl
-    .querySelectorAll(
-      ".player-card"
-    )
-    .forEach(
-      (card, index) => {
-
-        const entry =
-          players[index];
-
-        const name =
-          card.querySelector(
-            ".player-name"
-          );
-
-        const bet =
-          card.querySelector(
-            ".player-bet"
-          );
-
-        const status =
-          card.querySelector(
-            ".player-status"
-          );
+    totalPot.textContent =
+        pot.toLocaleString(
+            "uz-UZ"
+        ) +
+        " UZS";
 
 
-        if (!entry) {
+    /*
+       3 ISHTIROKCHI
+    */
 
-          name.textContent =
-            "Kutilmoqda...";
+    for (
+        let i = 0;
+        i < 3;
+        i++
+    ) {
 
-          bet.textContent =
-            "—";
+        const nameEl =
+            document.getElementById(
+                `player${i + 1}Name`
+            );
 
-          status.textContent =
-            "Bo‘sh";
+        const betEl =
+            document.getElementById(
+                `player${i + 1}Bet`
+            );
 
-          status.className =
-            "player-status";
+        const readyEl =
+            document.getElementById(
+                `player${i + 1}Ready`
+            );
 
-          return;
+
+        const wheelName =
+            document.getElementById(
+                `wheelName${i + 1}`
+            );
+
+
+        if (!players[i]) {
+
+            nameEl.textContent =
+                "Kutilmoqda...";
+
+            betEl.textContent =
+                "—";
+
+            readyEl.textContent =
+                "Kutilmoqda";
+
+            readyEl.className =
+                "player-ready";
+
+            wheelName.textContent =
+                "Kutilmoqda";
+
+            continue;
 
         }
 
 
         const player =
-          entry[1];
+            players[i][1];
 
 
-        name.textContent =
-          player.username;
+        nameEl.textContent =
+            player.username;
 
 
-        bet.textContent =
-          Number(
-            player.bet
-          ).toLocaleString(
-            "uz-UZ"
-          ) + " UZS";
+        betEl.textContent =
+            Number(
+                player.bet
+            ).toLocaleString(
+                "uz-UZ"
+            ) +
+            " UZS";
+
+
+        wheelName.textContent =
+            player.username;
 
 
         if (player.ready) {
 
-          status.textContent =
-            "✓ Tayyor";
+            readyEl.textContent =
+                "✓ Tayyor";
 
-          status.className =
-            "player-status ready";
-
-        } else {
-
-          status.textContent =
-            "⏳ Kutilmoqda";
-
-          status.className =
-            "player-status";
+            readyEl.className =
+                "player-ready ready";
 
         }
 
-      }
-    );
+        else {
+
+            readyEl.textContent =
+                "Kutilmoqda";
+
+            readyEl.className =
+                "player-ready";
+
+        }
+
+    }
 
 
-  /*
-     SPINNER NOMLARI
-  */
+    /*
+       MENING HOLATIM
+    */
 
-  const names =
-    players.map(
-      ([, player]) =>
-        player.username
-    );
-
-
-  document.getElementById("name1")
-    .textContent =
-      names[0] || "Kutilmoqda";
-
-  document.getElementById("name2")
-    .textContent =
-      names[1] || "Kutilmoqda";
-
-  document.getElementById("name3")
-    .textContent =
-      names[2] || "Kutilmoqda";
+    const mine =
+        game.players?.[
+            currentUser.uid
+        ];
 
 
-  /*
-     MENING HOLATIM
-  */
+    if (
+        !mine &&
+        players.length < 3 &&
+        game.status === "waiting"
+    ) {
 
-  const mine =
-    game.players?.[
-      currentUser.uid
-    ];
+        joinPanel.classList.remove(
+            "hidden"
+        );
 
+        readyPanel.classList.add(
+            "hidden"
+        );
 
-  if (
-    !mine &&
-    players.length < 3 &&
-    game.status === "waiting"
-  ) {
+    }
 
-    joinPanel.classList.remove(
-      "hidden"
-    );
+    else if (
+        mine &&
+        !mine.ready &&
+        game.status === "waiting"
+    ) {
 
-    readyPanel.classList.add(
-      "hidden"
-    );
+        joinPanel.classList.add(
+            "hidden"
+        );
 
-  }
-
-  else if (
-    mine &&
-    !mine.ready &&
-    game.status === "waiting"
-  ) {
-
-    joinPanel.classList.add(
-      "hidden"
-    );
-
-    readyPanel.classList.remove(
-      "hidden"
-    );
-
-    myBet.textContent =
-      `Sizning stavkangiz: ${
-        Number(mine.bet)
-          .toLocaleString("uz-UZ")
-      } UZS`;
-
-  }
-
-  else {
-
-    joinPanel.classList.add(
-      "hidden"
-    );
-
-    readyPanel.classList.add(
-      "hidden"
-    );
-
-  }
+        readyPanel.classList.remove(
+            "hidden"
+        );
 
 
-  /*
-     READY TEKSHIRISH
-  */
+        myBet.textContent =
+            "Sizning stavkangiz: " +
+            Number(
+                mine.bet
+            ).toLocaleString(
+                "uz-UZ"
+            ) +
+            " UZS";
 
-  if (
-    players.length === 3
-  ) {
+    }
 
-    const allReady =
-      players.every(
-        ([, player]) =>
-          player.ready === true
-      );
+    else {
+
+        joinPanel.classList.add(
+            "hidden"
+        );
+
+        readyPanel.classList.add(
+            "hidden"
+        );
+
+    }
 
 
-    if (allReady) {
+    /*
+       TAYYORLAR SONI
+    */
 
-      statusEl.textContent =
-        "3 / 3 ishtirokchi tayyor.";
+    const readyPlayers =
+        players.filter(
+            ([, player]) =>
+                player.ready === true
+        ).length;
 
-      if (
+
+    if (
+        players.length < 3
+    ) {
+
+        gameStatus.textContent =
+            `${players.length} / 3 ishtirokchi.`;
+
+    }
+
+    else {
+
+        gameStatus.textContent =
+            `${readyPlayers} / 3 ishtirokchi tayyor.`;
+
+    }
+
+
+    /*
+       3/3 TAYYOR
+    */
+
+    if (
+        players.length === 3 &&
+        readyPlayers === 3 &&
         game.status === "waiting" &&
         !spinning
-      ) {
+    ) {
 
         startRound();
 
-      }
-
-    } else {
-
-      const readyCount =
-        players.filter(
-          ([, player]) =>
-            player.ready
-        ).length;
-
-      statusEl.textContent =
-        `${readyCount} / 3 ishtirokchi tayyor.`;
-
     }
 
-  }
 
-  else {
+    /*
+       TAYYOR NATIJA
+    */
 
-    statusEl.textContent =
-      `${players.length} / 3 ishtirokchi.`;
+    if (
+        game.status === "finished" &&
+        game.winnerUsername
+    ) {
 
-  }
+        result.textContent =
+            `🏆 ${game.winnerUsername} G‘OLIB!`;
 
-
-  /*
-     NATIJA
-  */
-
-  if (
-    game.status === "finished" &&
-    game.winnerUsername
-  ) {
-
-    resultEl.textContent =
-      `🏆 ${game.winnerUsername} G‘OLIB!`;
-
-  }
+    }
 
 }
 
 
-/* JOIN */
+/* =========================
+   STAVKA QO‘YISH
+   ========================= */
 
 joinBtn.addEventListener(
-  "click",
-  async () => {
+    "click",
+    async () => {
 
-    const bet =
-      Number(
-        betInput.value
-      );
+        const bet =
+            Number(
+                betInput.value
+            );
 
 
-    if (
-      !Number.isFinite(bet) ||
-      bet < 1000
-    ) {
+        if (
+            !Number.isFinite(bet) ||
+            bet < 1000
+        ) {
 
-      statusEl.textContent =
-        "Minimal stavka 1 000 UZS.";
+            gameStatus.textContent =
+                "Minimal stavka 1 000 UZS.";
 
-      return;
+            return;
+
+        }
+
+
+        const balance =
+            Number(
+                profile.balance || 0
+            );
+
+
+        if (
+            bet > balance
+        ) {
+
+            gameStatus.textContent =
+                "Balans yetarli emas.";
+
+            return;
+
+        }
+
+
+        const players =
+            Object.keys(
+                game.players || {}
+            );
+
+
+        if (
+            players.length >= 3
+        ) {
+
+            gameStatus.textContent =
+                "Bu o‘yin to‘ldi.";
+
+            return;
+
+        }
+
+
+        joinBtn.disabled =
+            true;
+
+
+        try {
+
+            /*
+               BALANSDAN YECHISH
+            */
+
+            await update(
+                ref(
+                    db,
+                    `users/${currentUser.uid}`
+                ),
+                {
+                    balance:
+                        balance - bet
+                }
+            );
+
+
+            /*
+               O‘YINGA QO‘SHISH
+            */
+
+            await set(
+                ref(
+                    db,
+                    `games/${gameId}/players/${currentUser.uid}`
+                ),
+                {
+
+                    username:
+                        profile.username,
+
+                    bet:
+                        bet,
+
+                    ready:
+                        false,
+
+                    joinedAt:
+                        Date.now()
+
+                }
+            );
+
+
+            profile.balance =
+                balance - bet;
+
+
+        }
+
+        catch (error) {
+
+            console.error(
+                "JOIN ERROR:",
+                error
+            );
+
+
+            gameStatus.textContent =
+                "Stavka qo‘yishda xatolik.";
+
+
+            joinBtn.disabled =
+                false;
+
+        }
 
     }
-
-
-    const balance =
-      Number(
-        profile.balance || 0
-      );
-
-
-    if (bet > balance) {
-
-      statusEl.textContent =
-        "Balans yetarli emas.";
-
-      return;
-
-    }
-
-
-    if (
-      Object.keys(
-        game.players || {}
-      ).length >= 3
-    ) {
-
-      statusEl.textContent =
-        "Bu o‘yin to‘ldi.";
-
-      return;
-
-    }
-
-
-    /*
-       PULNI BALANSDAN YECHAMIZ
-    */
-
-    await update(
-      ref(
-        db,
-        `users/${currentUser.uid}`
-      ),
-      {
-        balance:
-          balance - bet
-      }
-    );
-
-
-    /*
-       ISHTIROKCHINI YOZAMIZ
-    */
-
-    await set(
-      ref(
-        db,
-        `games/${gameId}/players/${currentUser.uid}`
-      ),
-      {
-
-        username:
-          profile.username,
-
-        bet:
-          bet,
-
-        ready:
-          false,
-
-        joinedAt:
-          Date.now()
-
-      }
-    );
-
-
-    profile.balance =
-      balance - bet;
-
-  }
 );
 
 
-/* READY */
+/* =========================
+   TAYYOR
+   ========================= */
 
 readyBtn.addEventListener(
-  "click",
-  async () => {
+    "click",
+    async () => {
 
-    const mine =
-      game.players?.[
-        currentUser.uid
-      ];
-
-
-    if (!mine) return;
+        const mine =
+            game.players?.[
+                currentUser.uid
+            ];
 
 
-    readyBtn.disabled =
-      true;
+        if (!mine)
+            return;
 
 
-    await update(
-      ref(
-        db,
-        `games/${gameId}/players/${currentUser.uid}`
-      ),
-      {
-        ready: true
-      }
-    );
+        readyBtn.disabled =
+            true;
 
-  }
+
+        try {
+
+            await update(
+                ref(
+                    db,
+                    `games/${gameId}/players/${currentUser.uid}`
+                ),
+                {
+                    ready:
+                        true
+                }
+            );
+
+        }
+
+        catch (error) {
+
+            console.error(
+                "READY ERROR:",
+                error
+            );
+
+            readyBtn.disabled =
+                false;
+
+        }
+
+    }
 );
 
 
-/* START ROUND */
+/* =========================
+   O‘YINNI BOSHLASH
+   ========================= */
 
 async function startRound() {
 
-  if (spinning) return;
+    if (spinning)
+        return;
 
-  spinning = true;
+
+    spinning = true;
 
 
-  const players =
-    Object.entries(
-      game.players || {}
+    const players =
+        Object.entries(
+            game.players || {}
+        );
+
+
+    if (
+        players.length !== 3
+    ) {
+
+        spinning = false;
+
+        return;
+
+    }
+
+
+    /*
+       JAMI BANK
+    */
+
+    const pot =
+        players.reduce(
+            (sum, [, player]) =>
+                sum +
+                Number(player.bet),
+            0
+        );
+
+
+    /*
+       COUNTDOWN
+    */
+
+    await update(
+        ref(
+            db,
+            `games/${gameId}`
+        ),
+        {
+
+            status:
+                "countdown",
+
+            totalPot:
+                pot
+
+        }
     );
 
 
-  if (
-    players.length !== 3
-  ) {
+    for (
+        let i = 3;
+        i >= 1;
+        i--
+    ) {
+
+        countdown.textContent =
+            i;
+
+        await wait(1000);
+
+    }
+
+
+    countdown.textContent =
+        "";
+
+
+    /*
+       G‘OLIBNI TANLASH
+    */
+
+    const winnerIndex =
+        Math.floor(
+            Math.random() * 3
+        );
+
+
+    const winner =
+        players[winnerIndex];
+
+
+    const winnerUid =
+        winner[0];
+
+
+    const winnerUsername =
+        winner[1].username;
+
+
+    /*
+       G‘OLIB SEKTORINI
+       YASHIL QILAMIZ
+    */
+
+    wheel.classList.remove(
+        "winner-1",
+        "winner-2",
+        "winner-3"
+    );
+
+
+    wheel.classList.add(
+        `winner-${winnerIndex + 1}`
+    );
+
+
+    /*
+       SPINNER
+
+       3 sektor:
+
+       1 = 0° - 120°
+       2 = 120° - 240°
+       3 = 240° - 360°
+    */
+
+    const sectorCenter =
+        winnerIndex * 120 + 60;
+
+
+    const turns =
+        6 * 360;
+
+
+    const target =
+        rotation +
+        turns +
+        (360 - sectorCenter);
+
+
+    rotation =
+        target;
+
+
+    await update(
+        ref(
+            db,
+            `games/${gameId}`
+        ),
+        {
+
+            status:
+                "spinning",
+
+            winnerUid:
+                winnerUid,
+
+            winnerUsername:
+                winnerUsername
+
+        }
+    );
+
+
+    /*
+       BARABAN
+    */
+
+    wheel.style.transform =
+        `rotate(${target}deg)`;
+
+
+    await wait(6000);
+
+
+    /*
+       G‘OLIB BALANSI
+    */
+
+    const winnerSnapshot =
+        await get(
+            ref(
+                db,
+                `users/${winnerUid}`
+            )
+        );
+
+
+    const winnerProfile =
+        winnerSnapshot.val();
+
+
+    const winnerBalance =
+        Number(
+            winnerProfile.balance || 0
+        );
+
+
+    await update(
+        ref(
+            db,
+            `users/${winnerUid}`
+        ),
+        {
+
+            balance:
+                winnerBalance + pot
+
+        }
+    );
+
+
+    /*
+       O‘YIN TUGADI
+    */
+
+    await update(
+        ref(
+            db,
+            `games/${gameId}`
+        ),
+        {
+
+            status:
+                "finished",
+
+            winnerUid:
+                winnerUid,
+
+            winnerUsername:
+                winnerUsername,
+
+            totalPot:
+                pot,
+
+            finishedAt:
+                Date.now()
+
+        }
+    );
+
+
+    result.textContent =
+        `🏆 ${winnerUsername} G‘OLIB!`;
+
+
+    gameStatus.textContent =
+        "O‘yin yakunlandi.";
+
 
     spinning = false;
-
-    return;
-
-  }
-
-
-  /*
-     BANK
-  */
-
-  const totalPot =
-    players.reduce(
-      (sum, [, player]) =>
-        sum + Number(player.bet),
-      0
-    );
-
-
-  /*
-     COUNTDOWN
-  */
-
-  await update(
-    ref(
-      db,
-      `games/${gameId}`
-    ),
-    {
-      status:
-        "countdown",
-
-      totalPot:
-        totalPot
-    }
-  );
-
-
-  for (
-    let i = 3;
-    i >= 1;
-    i--
-  ) {
-
-    countdownEl.textContent =
-      i;
-
-    await wait(1000);
-
-  }
-
-
-  countdownEl.textContent =
-    "";
-
-
-  /*
-     TASODIFIY G‘OLIB
-  */
-
-  const winnerIndex =
-    Math.floor(
-      Math.random() * 3
-    );
-
-
-  const winner =
-    players[winnerIndex];
-
-
-  const winnerUid =
-    winner[0];
-
-  const winnerUsername =
-    winner[1].username;
-
-
-  /*
-     3 SEKTOR:
-     
-     0°   = 1-o‘yinchi
-     120° = 2-o‘yinchi
-     240° = 3-o‘yinchi
-  */
-
-  const sectorCenter =
-    winnerIndex * 120 + 60;
-
-
-  const fullTurns =
-    6 * 360;
-
-
-  const finalRotation =
-    wheelRotation +
-    fullTurns +
-    (360 - sectorCenter);
-
-
-  wheelRotation =
-    finalRotation;
-
-
-  await update(
-    ref(
-      db,
-      `games/${gameId}`
-    ),
-    {
-
-      status:
-        "spinning",
-
-      winnerUid:
-        winnerUid,
-
-      winnerUsername:
-        winnerUsername
-
-    }
-  );
-
-
-  /*
-     SPINNER
-  */
-
-  wheel.style.transform =
-    `rotate(${finalRotation}deg)`;
-
-
-  await wait(6000);
-
-
-  /*
-     G‘OLIB BALANSI
-  */
-
-  const winnerSnapshot =
-    await get(
-      ref(
-        db,
-        `users/${winnerUid}`
-      )
-    );
-
-
-  const winnerProfile =
-    winnerSnapshot.val();
-
-
-  const newBalance =
-    Number(
-      winnerProfile.balance || 0
-    ) + totalPot;
-
-
-  await update(
-    ref(
-      db,
-      `users/${winnerUid}`
-    ),
-    {
-      balance:
-        newBalance
-    }
-  );
-
-
-  /*
-     O‘YINNI YAKUNLASH
-  */
-
-  await update(
-    ref(
-      db,
-      `games/${gameId}`
-    ),
-    {
-
-      status:
-        "finished",
-
-      finishedAt:
-        Date.now(),
-
-      winnerUid:
-        winnerUid,
-
-      winnerUsername:
-        winnerUsername
-
-    }
-  );
-
-
-  resultEl.textContent =
-    `🏆 ${winnerUsername} G‘OLIB!`;
-
-
-  spinning = false;
 
 }
 
 
+/* =========================
+   WAIT
+   ========================= */
+
 function wait(ms) {
 
-  return new Promise(
-    resolve =>
-      setTimeout(
-        resolve,
-        ms
-      )
-  );
+    return new Promise(
+        resolve =>
+            setTimeout(
+                resolve,
+                ms
+            )
+    );
 
 }
