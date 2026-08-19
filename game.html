@@ -1,0 +1,963 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Royal Wheel Casino</title>
+
+<style>
+    * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+    }
+
+    body {
+        min-height: 100vh;
+        font-family: Arial, Helvetica, sans-serif;
+        background:
+            radial-gradient(circle at top, #26345c 0%, #0b1020 45%, #05070d 100%);
+        color: white;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        overflow-x: hidden;
+    }
+
+    .game {
+        width: min(1100px, 96vw);
+        padding: 25px;
+    }
+
+    .header {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+    .header h1 {
+        font-size: clamp(30px, 5vw, 55px);
+        color: #ffd84a;
+        text-shadow:
+            0 0 10px rgba(255, 216, 74, .5),
+            0 4px 15px #000;
+        letter-spacing: 3px;
+    }
+
+    .header p {
+        color: #bfc7df;
+        margin-top: 5px;
+    }
+
+    .casino {
+        display: grid;
+        grid-template-columns: 1fr 350px;
+        gap: 30px;
+        align-items: center;
+    }
+
+    .wheel-area {
+        position: relative;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+    }
+
+    canvas {
+        width: min(620px, 90vw);
+        height: min(620px, 90vw);
+        max-width: 620px;
+        max-height: 620px;
+        border-radius: 50%;
+        filter: drop-shadow(0 15px 35px rgba(0,0,0,.6));
+    }
+
+    /* Pointer */
+    .pointer {
+        position: absolute;
+        top: 5px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 10;
+        width: 0;
+        height: 0;
+        border-left: 23px solid transparent;
+        border-right: 23px solid transparent;
+        border-top: 55px solid #ffd84a;
+        filter:
+            drop-shadow(0 4px 2px #000)
+            drop-shadow(0 0 8px rgba(255,216,74,.7));
+    }
+
+    .pointer::after {
+        content: "";
+        position: absolute;
+        left: -11px;
+        top: -52px;
+        width: 22px;
+        height: 10px;
+        background: #fff2a1;
+        border-radius: 50%;
+    }
+
+    .panel {
+        background: rgba(13, 18, 35, .92);
+        border: 1px solid rgba(255,255,255,.12);
+        border-radius: 24px;
+        padding: 25px;
+        box-shadow:
+            0 20px 50px rgba(0,0,0,.45),
+            inset 0 1px rgba(255,255,255,.08);
+    }
+
+    .balance {
+        background: linear-gradient(135deg, #1b2746, #10172c);
+        border-radius: 16px;
+        padding: 18px;
+        text-align: center;
+        margin-bottom: 20px;
+        border: 1px solid rgba(255,216,74,.2);
+    }
+
+    .balance-label {
+        color: #9ba6c5;
+        font-size: 13px;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+    }
+
+    .balance-value {
+        font-size: 34px;
+        font-weight: bold;
+        color: #ffd84a;
+        margin-top: 5px;
+    }
+
+    .section-title {
+        font-size: 14px;
+        color: #aab3ce;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        margin-bottom: 10px;
+    }
+
+    .bet-buttons {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 8px;
+        margin-bottom: 20px;
+    }
+
+    button {
+        border: none;
+        cursor: pointer;
+        font-weight: bold;
+        transition: .2s;
+    }
+
+    .bet-btn {
+        padding: 11px 5px;
+        border-radius: 10px;
+        color: white;
+        background: #222c49;
+        border: 1px solid rgba(255,255,255,.08);
+    }
+
+    .bet-btn:hover {
+        background: #304064;
+        transform: translateY(-2px);
+    }
+
+    .bet-btn.active {
+        background: linear-gradient(135deg, #f7c62d, #e49a16);
+        color: #17100a;
+        border-color: #ffe27b;
+        box-shadow: 0 5px 15px rgba(255,193,35,.25);
+    }
+
+    .current-bet {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: #090e1c;
+        padding: 13px 15px;
+        border-radius: 10px;
+        margin-bottom: 15px;
+    }
+
+    .current-bet span:last-child {
+        color: #ffd84a;
+        font-weight: bold;
+    }
+
+    .spin-btn {
+        width: 100%;
+        padding: 18px;
+        border-radius: 14px;
+        font-size: 20px;
+        color: #17100a;
+        background: linear-gradient(135deg, #ffe66d, #f2aa19);
+        box-shadow:
+            0 7px 0 #9c6810,
+            0 12px 25px rgba(240,175,25,.25);
+        margin-bottom: 15px;
+    }
+
+    .spin-btn:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow:
+            0 9px 0 #9c6810,
+            0 15px 30px rgba(240,175,25,.35);
+    }
+
+    .spin-btn:active:not(:disabled) {
+        transform: translateY(5px);
+        box-shadow: 0 2px 0 #9c6810;
+    }
+
+    .spin-btn:disabled {
+        cursor: not-allowed;
+        opacity: .45;
+    }
+
+    .result {
+        min-height: 80px;
+        border-radius: 14px;
+        padding: 15px;
+        text-align: center;
+        background: #090e1c;
+        border: 1px solid rgba(255,255,255,.07);
+    }
+
+    .result-title {
+        color: #9ba6c5;
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+    }
+
+    .result-value {
+        margin-top: 5px;
+        font-size: 25px;
+        font-weight: bold;
+    }
+
+    .win {
+        color: #53f08b;
+    }
+
+    .lose {
+        color: #ff6074;
+    }
+
+    .history {
+        margin-top: 18px;
+    }
+
+    .history-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+
+    .history-item {
+        min-width: 42px;
+        padding: 7px;
+        text-align: center;
+        border-radius: 8px;
+        background: #1c2640;
+        font-size: 12px;
+        font-weight: bold;
+    }
+
+    .history-item.win-history {
+        border: 1px solid #45db7b;
+        color: #62ef93;
+    }
+
+    .history-item.lose-history {
+        border: 1px solid #ef5267;
+        color: #ff7180;
+    }
+
+    .reset {
+        width: 100%;
+        padding: 11px;
+        border-radius: 10px;
+        background: transparent;
+        color: #9ba6c5;
+        border: 1px solid rgba(255,255,255,.1);
+        margin-top: 15px;
+    }
+
+    .reset:hover {
+        color: white;
+        background: rgba(255,255,255,.05);
+    }
+
+    .message {
+        text-align: center;
+        color: #9ba6c5;
+        font-size: 13px;
+        margin-top: 15px;
+    }
+
+    @media (max-width: 850px) {
+        .casino {
+            grid-template-columns: 1fr;
+        }
+
+        .panel {
+            max-width: 550px;
+            width: 100%;
+            margin: auto;
+        }
+    }
+
+    @media (max-width: 500px) {
+        .game {
+            padding: 10px;
+        }
+
+        .wheel-area {
+            padding: 5px;
+        }
+
+        .panel {
+            padding: 18px;
+        }
+
+        .bet-buttons {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+</style>
+</head>
+
+<body>
+
+<div class="game">
+
+    <div class="header">
+        <h1>🎰 ROYAL WHEEL</h1>
+        <p>Spin the wheel and test your luck!</p>
+    </div>
+
+    <div class="casino">
+
+        <div class="wheel-area">
+            <div class="pointer"></div>
+            <canvas id="wheel" width="700" height="700"></canvas>
+        </div>
+
+        <div class="panel">
+
+            <div class="balance">
+                <div class="balance-label">Your Balance</div>
+                <div class="balance-value">
+                    🪙 <span id="balance">1000</span>
+                </div>
+            </div>
+
+            <div class="section-title">Choose your bet</div>
+
+            <div class="bet-buttons">
+                <button class="bet-btn active" data-bet="10">10</button>
+                <button class="bet-btn" data-bet="25">25</button>
+                <button class="bet-btn" data-bet="50">50</button>
+                <button class="bet-btn" data-bet="100">100</button>
+                <button class="bet-btn" data-bet="250">250</button>
+                <button class="bet-btn" data-bet="500">500</button>
+                <button class="bet-btn" data-bet="1000">1000</button>
+                <button class="bet-btn" data-bet="custom">MAX</button>
+            </div>
+
+            <div class="current-bet">
+                <span>Current Bet</span>
+                <span>🪙 <span id="bet">10</span></span>
+            </div>
+
+            <button class="spin-btn" id="spinBtn">
+                🎡 SPIN
+            </button>
+
+            <div class="result">
+                <div class="result-title">Last Result</div>
+                <div class="result-value" id="result">
+                    Ready to spin!
+                </div>
+            </div>
+
+            <div class="history">
+                <div class="section-title">History</div>
+                <div class="history-list" id="history"></div>
+            </div>
+
+            <button class="reset" id="resetBtn">
+                Reset Game
+            </button>
+
+            <div class="message">
+                Virtual coins only — no real-money gambling.
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+<script>
+/* ==========================================
+   ROYAL WHEEL
+   Virtual casino-style wheel game
+   ========================================== */
+
+const canvas = document.getElementById("wheel");
+const ctx = canvas.getContext("2d");
+
+const balanceEl = document.getElementById("balance");
+const betEl = document.getElementById("bet");
+const resultEl = document.getElementById("result");
+const spinBtn = document.getElementById("spinBtn");
+const historyEl = document.getElementById("history");
+const resetBtn = document.getElementById("resetBtn");
+const betButtons = document.querySelectorAll(".bet-btn");
+
+let balance = 1000;
+let currentBet = 10;
+let rotation = 0;
+let spinning = false;
+
+/*
+    Wheel configuration.
+
+    multiplier:
+    0 = lose
+    0.5 = receive half of bet
+    1 = receive original bet
+    2 = win 2x
+    3 = win 3x
+    5 = win 5x
+    10 = win 10x
+*/
+
+const sectors = [
+    { label: "LOSE", multiplier: 0, color: "#b82036" },
+    { label: "2X", multiplier: 2, color: "#1769aa" },
+    { label: "1X", multiplier: 1, color: "#16834b" },
+    { label: "LOSE", multiplier: 0, color: "#8d1830" },
+    { label: "3X", multiplier: 3, color: "#8b27a8" },
+    { label: "0.5X", multiplier: 0.5, color: "#c78316" },
+    { label: "LOSE", multiplier: 0, color: "#b82036" },
+    { label: "5X", multiplier: 5, color: "#1769aa" },
+    { label: "1X", multiplier: 1, color: "#16834b" },
+    { label: "LOSE", multiplier: 0, color: "#8d1830" },
+    { label: "2X", multiplier: 2, color: "#8b27a8" },
+    { label: "10X", multiplier: 10, color: "#d69c18" },
+    { label: "LOSE", multiplier: 0, color: "#b82036" },
+    { label: "3X", multiplier: 3, color: "#1769aa" },
+    { label: "0.5X", multiplier: 0.5, color: "#16834b" },
+    { label: "LOSE", multiplier: 0, color: "#8d1830" }
+];
+
+const segmentAngle = (Math.PI * 2) / sectors.length;
+
+
+/* ==========================================
+   DRAW WHEEL
+   ========================================== */
+
+function drawWheel() {
+
+    const center = canvas.width / 2;
+    const radius = canvas.width / 2 - 12;
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    ctx.save();
+
+    ctx.translate(center, center);
+    ctx.rotate(rotation);
+
+    // Outer gold ring
+    ctx.beginPath();
+    ctx.arc(0, 0, radius + 4, 0, Math.PI * 2);
+    ctx.fillStyle = "#f7ca45";
+    ctx.fill();
+
+    // Dark border
+    ctx.beginPath();
+    ctx.arc(0, 0, radius, 0, Math.PI * 2);
+    ctx.fillStyle = "#111827";
+    ctx.fill();
+
+    for (let i = 0; i < sectors.length; i++) {
+
+        const start = i * segmentAngle - Math.PI / 2;
+        const end = start + segmentAngle;
+
+        const sector = sectors[i];
+
+        // Sector
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.arc(0, 0, radius - 10, start, end);
+        ctx.closePath();
+
+        ctx.fillStyle = sector.color;
+        ctx.fill();
+
+        // Sector border
+        ctx.strokeStyle = "#f5d56a";
+        ctx.lineWidth = 3;
+        ctx.stroke();
+
+        // Text
+        const textAngle = start + segmentAngle / 2;
+
+        ctx.save();
+
+        ctx.rotate(textAngle);
+
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+
+        ctx.font = "bold 30px Arial";
+        ctx.fillStyle = "#ffffff";
+        ctx.shadowColor = "rgba(0,0,0,.7)";
+        ctx.shadowBlur = 5;
+
+        ctx.fillText(
+            sector.label,
+            radius * 0.70,
+            0
+        );
+
+        ctx.restore();
+    }
+
+    // Inner circle
+    ctx.beginPath();
+    ctx.arc(0, 0, 105, 0, Math.PI * 2);
+    ctx.fillStyle = "#111827";
+    ctx.fill();
+
+    ctx.strokeStyle = "#f7ca45";
+    ctx.lineWidth = 7;
+    ctx.stroke();
+
+    // Center decoration
+    ctx.beginPath();
+    ctx.arc(0, 0, 75, 0, Math.PI * 2);
+    ctx.fillStyle = "#18223b";
+    ctx.fill();
+
+    ctx.strokeStyle = "#fff0a0";
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    ctx.fillStyle = "#ffd84a";
+    ctx.font = "bold 25px Arial";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.shadowBlur = 10;
+    ctx.fillText("SPIN", 0, -5);
+
+    ctx.font = "bold 14px Arial";
+    ctx.fillStyle = "#ffffff";
+    ctx.fillText("ROYAL", 0, 25);
+
+    ctx.restore();
+
+    // Outer lights
+    drawLights(center, center, radius + 20);
+}
+
+
+/* ==========================================
+   DRAW OUTER LIGHTS
+   ========================================== */
+
+function drawLights(cx, cy, radius) {
+
+    const lights = 32;
+
+    for (let i = 0; i < lights; i++) {
+
+        const angle = (Math.PI * 2 / lights) * i;
+
+        const x = cx + Math.cos(angle) * radius;
+        const y = cy + Math.sin(angle) * radius;
+
+        ctx.beginPath();
+        ctx.arc(x, y, 6, 0, Math.PI * 2);
+
+        const pulse =
+            Math.sin(Date.now() / 180 + i) > 0;
+
+        ctx.fillStyle = pulse
+            ? "#fff3a0"
+            : "#d69c18";
+
+        ctx.shadowColor = "#ffd84a";
+        ctx.shadowBlur = pulse ? 18 : 5;
+
+        ctx.fill();
+    }
+
+    ctx.shadowBlur = 0;
+}
+
+
+/* ==========================================
+   ANIMATION LOOP
+   ========================================== */
+
+function animationLoop() {
+    drawWheel();
+    requestAnimationFrame(animationLoop);
+}
+
+animationLoop();
+
+
+/* ==========================================
+   BET BUTTONS
+   ========================================== */
+
+betButtons.forEach(button => {
+
+    button.addEventListener("click", () => {
+
+        if (spinning) return;
+
+        let value = button.dataset.bet;
+
+        if (value === "custom") {
+            currentBet = balance;
+        } else {
+            currentBet = Number(value);
+        }
+
+        if (currentBet > balance) {
+            currentBet = balance;
+        }
+
+        if (currentBet < 1) {
+            currentBet = 1;
+        }
+
+        betButtons.forEach(b =>
+            b.classList.remove("active")
+        );
+
+        button.classList.add("active");
+
+        updateUI();
+    });
+
+});
+
+
+/* ==========================================
+   SPIN
+   ========================================== */
+
+spinBtn.addEventListener("click", spin);
+
+function spin() {
+
+    if (spinning) return;
+
+    if (currentBet > balance) {
+        currentBet = balance;
+    }
+
+    if (currentBet <= 0) {
+        resultEl.textContent = "Game over!";
+        resultEl.className = "result-value lose";
+        return;
+    }
+
+    spinning = true;
+    spinBtn.disabled = true;
+
+    // Take bet
+    balance -= currentBet;
+
+    updateUI();
+
+    resultEl.textContent = "Spinning...";
+    resultEl.className = "result-value";
+
+    /*
+        Random winning sector.
+
+        We select the sector first,
+        then calculate the exact rotation
+        needed to put it under the pointer.
+    */
+
+    const winningIndex =
+        Math.floor(Math.random() * sectors.length);
+
+    const segment = sectors[winningIndex];
+
+    // Center angle of winning sector
+    const targetAngle =
+        winningIndex * segmentAngle +
+        segmentAngle / 2;
+
+    /*
+        Pointer is at -90 degrees.
+
+        Wheel is rotated, so we calculate
+        the final rotation that places the
+        selected sector under the pointer.
+    */
+
+    const desiredRotation =
+        -targetAngle;
+
+    const currentNormalized =
+        rotation % (Math.PI * 2);
+
+    let difference =
+        desiredRotation - currentNormalized;
+
+    while (difference < 0) {
+        difference += Math.PI * 2;
+    }
+
+    // Add several complete rotations
+    const fullSpins =
+        7 + Math.floor(Math.random() * 4);
+
+    const finalRotation =
+        rotation +
+        fullSpins * Math.PI * 2 +
+        difference;
+
+    const startRotation = rotation;
+    const duration = 5000;
+
+    const startTime = performance.now();
+
+    function animate(time) {
+
+        const elapsed = time - startTime;
+        let progress = elapsed / duration;
+
+        if (progress > 1) {
+            progress = 1;
+        }
+
+        /*
+            Cubic ease-out:
+            Fast at first, slow at the end.
+        */
+
+        const eased =
+            1 - Math.pow(1 - progress, 4);
+
+        rotation =
+            startRotation +
+            (finalRotation - startRotation) *
+            eased;
+
+        if (progress < 1) {
+
+            requestAnimationFrame(animate);
+
+        } else {
+
+            rotation = finalRotation;
+
+            finishSpin(segment);
+        }
+    }
+
+    requestAnimationFrame(animate);
+}
+
+
+/* ==========================================
+   FINISH SPIN
+   ========================================== */
+
+function finishSpin(segment) {
+
+    const bet = currentBet;
+
+    let payout = 0;
+
+    if (segment.multiplier > 0) {
+        payout = Math.floor(
+            bet * segment.multiplier
+        );
+
+        balance += payout;
+    }
+
+    let message;
+
+    if (segment.multiplier === 0) {
+
+        message = "💥 YOU LOST " + bet;
+
+        resultEl.className =
+            "result-value lose";
+
+        addHistory(
+            segment.label,
+            false
+        );
+
+    } else {
+
+        const profit =
+            payout - bet;
+
+        if (segment.multiplier === 1) {
+            message = "😐 BREAK EVEN";
+        } else {
+            message =
+                "🎉 WIN +" +
+                profit +
+                "!";
+        }
+
+        resultEl.className =
+            "result-value win";
+
+        addHistory(
+            segment.label,
+            true
+        );
+    }
+
+    resultEl.textContent =
+        message;
+
+    spinning = false;
+    spinBtn.disabled = false;
+
+    updateUI();
+
+    // Game over
+    if (balance <= 0) {
+
+        resultEl.textContent =
+            "💀 GAME OVER";
+
+        spinBtn.disabled = true;
+    }
+
+    // Automatically adjust bet
+    if (currentBet > balance && balance > 0) {
+        currentBet = balance;
+        updateUI();
+    }
+}
+
+
+/* ==========================================
+   HISTORY
+   ========================================== */
+
+function addHistory(label, won) {
+
+    const item =
+        document.createElement("div");
+
+    item.className =
+        "history-item " +
+        (won
+            ? "win-history"
+            : "lose-history");
+
+    item.textContent = label;
+
+    historyEl.prepend(item);
+
+    // Keep only last 12
+    while (historyEl.children.length > 12) {
+        historyEl.removeChild(
+            historyEl.lastChild
+        );
+    }
+}
+
+
+/* ==========================================
+   UI
+   ========================================== */
+
+function updateUI() {
+
+    balanceEl.textContent =
+        balance.toLocaleString();
+
+    betEl.textContent =
+        currentBet.toLocaleString();
+}
+
+
+/* ==========================================
+   RESET
+   ========================================== */
+
+resetBtn.addEventListener("click", () => {
+
+    if (spinning) return;
+
+    balance = 1000;
+    currentBet = 10;
+    rotation = 0;
+
+    historyEl.innerHTML = "";
+
+    resultEl.textContent =
+        "Ready to spin!";
+
+    resultEl.className =
+        "result-value";
+
+    betButtons.forEach(button =>
+        button.classList.remove("active")
+    );
+
+    document
+        .querySelector('[data-bet="10"]')
+        .classList.add("active");
+
+    spinBtn.disabled = false;
+
+    updateUI();
+});
+
+
+/* ==========================================
+   KEYBOARD SUPPORT
+   ========================================== */
+
+document.addEventListener("keydown", e => {
+
+    if (e.code === "Space") {
+
+        e.preventDefault();
+
+        if (!spinning) {
+            spin();
+        }
+    }
+});
+
+
+/* Initial UI */
+updateUI();
+
+</script>
+
+</body>
+</html>
